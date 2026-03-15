@@ -1,11 +1,11 @@
 package com.example.trainbooking.test.trip;
 
-import com.example.trainbooking.domain.station.Station;
-import com.example.trainbooking.domain.station.StationRepository;
-import com.example.trainbooking.domain.trip.domain.Trip;
-import com.example.trainbooking.domain.trip.domain.TripRepository;
-import com.example.trainbooking.domain.trip.presentation.dto.TripRequest;
-import com.example.trainbooking.domain.trip.presentation.dto.TripResponse;
+import com.example.trainbooking.module.station.domain.Station;
+import com.example.trainbooking.module.station.domain.StationRepository;
+import com.example.trainbooking.module.trip.domain.Trip;
+import com.example.trainbooking.module.trip.domain.TripRepository;
+import com.example.trainbooking.module.trip.presentation.dto.TripResponse;
+import com.example.trainbooking.module.trip.presentation.dto.TripSelectOptions;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -38,7 +41,7 @@ public class TripRepositoryTest {
     @Test
     void trip_저장() {
 
-        Timestamp date = new Timestamp(System.currentTimeMillis());
+        LocalDateTime date = LocalDateTime.now();
 
         Station toStation = stationRepository.getReferenceById(1L);
         Station fromStation = stationRepository.getReferenceById(2L);
@@ -62,7 +65,23 @@ public class TripRepositoryTest {
         assertThat(found.getFromStation().getStationId()).isEqualTo(2L);
         assertThat(found.getToStation().getStationId()).isEqualTo(1L);
 
-//        entityManager.flush();
-//        entityManager.clear();
+    }
+
+    @Test
+    void trip_검색옵션_조회() {
+        List<TripSelectOptions> tripSelectOptions = tripRepository.findTripSelectOptions();
+
+        assertThat(tripSelectOptions.get(1).getDepartureTime()).isNotNull();
+    }
+
+    @Test
+    void trip_검색_조회() {
+        LocalDate targetDate = LocalDate.parse("20260130", DateTimeFormatter.ofPattern("yyyyMMdd"));
+        LocalDateTime start = targetDate.atStartOfDay();
+        LocalDateTime end = targetDate.plusDays(1).atStartOfDay();
+        List<TripResponse> tripSelectOptions = tripRepository.findByStation_StationId_And_DepartureTime(5L, start, end);
+
+//        assertThat(tripSelectOptions).isNotEmpty();
+        assertThat(tripSelectOptions.get(0).getDepartureTime()).isNotNull();
     }
 }

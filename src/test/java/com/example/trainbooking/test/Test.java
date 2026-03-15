@@ -1,6 +1,6 @@
 package com.example.trainbooking.test;
 
-import com.example.trainbooking.domain.trip.presentation.TripController;
+import com.example.trainbooking.module.trip.presentation.TripController;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;

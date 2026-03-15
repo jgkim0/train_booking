@@ -1,0 +1,42 @@
+@startuml
+
+actor User
+
+User -> BookingController : POST /bookings
+activate BookingController
+
+BookingController -> BookingService : createBooking(tripId, seatId)
+activate BookingService
+
+note right of BookingService
+@Transactional
+Seat Lock
+end note
+
+BookingService -> SeatRepository : findById(seatId)
+activate SeatRepository
+SeatRepository --> BookingService : Seat
+deactivate SeatRepository
+
+BookingService -> SeatRepository : update status = BOOKED
+activate SeatRepository
+SeatRepository --> BookingService
+deactivate SeatRepository
+
+BookingService -> BookingRepository : save(Booking)
+activate BookingRepository
+BookingRepository --> BookingService : bookingId
+deactivate BookingRepository
+
+BookingService -> PaymentRepository : save(Payment READY)
+activate PaymentRepository
+PaymentRepository --> BookingService
+deactivate PaymentRepository
+
+BookingService --> BookingController : bookingId
+deactivate BookingService
+
+BookingController --> User : bookingId
+deactivate BookingController
+
+@enduml

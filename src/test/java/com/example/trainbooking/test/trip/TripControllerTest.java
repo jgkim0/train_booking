@@ -1,8 +1,8 @@
 package com.example.trainbooking.test.trip;
 
-import com.example.trainbooking.domain.trip.domain.Trip;
-import com.example.trainbooking.domain.trip.presentation.TripController;
-import com.example.trainbooking.domain.trip.application.TripService;
+import com.example.trainbooking.module.trip.domain.Trip;
+import com.example.trainbooking.module.trip.presentation.TripController;
+import com.example.trainbooking.module.trip.application.TripService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
