@@ -5,6 +5,7 @@ import com.example.trainbooking.module.trip.presentation.dto.TripSelectOptions;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -12,23 +13,18 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long> {
 
-    // Spring Data JPA가 Optional 쓰는 이유
-
     Optional<Trip> findById(Long id);
 
-    // 없어도 됨
-//    Trip save(Trip trip);
-
+    // @Embedded 값 타입 경로: t.schedule.departureTime
     @Query("""
             select distinct new com.example.trainbooking.module.trip.presentation.dto.TripSelectOptions(
                fs.stationId,
-               t.departureTime
+               t.schedule.departureTime
            )
            from Trip t
            join t.fromStation fs
            """)
     List<TripSelectOptions> findTripSelectOptions();
-
 
     @Query("""
             select new com.example.trainbooking.module.trip.presentation.dto.TripResponse(
@@ -36,18 +32,15 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                         t.trainNo,
                         fs.stationId,
                         ts.stationId,
-                        t.departureTime,
-                        t.arrivalTime
+                        t.schedule.departureTime,
+                        t.schedule.arrivalTime
                     )
                     from Trip t
                     join t.fromStation fs
                     join t.toStation ts
                     where fs.stationId = :stationId
-                      and t.departureTime >= :startDate
-                      and t.departureTime < :endDate
+                      and t.schedule.departureTime >= :startDate
+                      and t.schedule.departureTime < :endDate
            """)
     List<TripResponse> findByStation_StationId_And_DepartureTime(Long stationId, LocalDateTime startDate, LocalDateTime endDate);
-
 }
-
-

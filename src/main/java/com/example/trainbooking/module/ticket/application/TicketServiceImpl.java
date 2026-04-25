@@ -9,32 +9,35 @@ import com.example.trainbooking.module.ticket.domain.TicketRepository;
 import com.example.trainbooking.module.ticket.presentation.dto.TicketRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-public class TicketServiceImpl implements TicketService{
+public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
-
     private final BookingRepository bookingRepository;
-
     private final SeatRepository seatRepository;
 
-
     @Override
+    @Transactional
     public void createTicket(TicketRequest ticketRequest) {
-
         Booking booked = bookingRepository.getReferenceById(ticketRequest.getBooking());
-
         Seat seat = seatRepository.getReferenceById(ticketRequest.getSeatId());
 
         Ticket newTicket = Ticket.builder()
                 .booking(booked)
-                .seat(seat).ticketNo(55L).issuedAt(Timestamp.valueOf(LocalDateTime.now())).build();
+                .seat(seat)
+                .ticketNo(generateTicketNo())
+                .build();
 
         ticketRepository.save(newTicket);
+    }
+
+    // 실제 서비스라면 채번 테이블이나 UUID 기반으로 생성해야 함
+    private Long generateTicketNo() {
+        return ThreadLocalRandom.current().nextLong(1_000_000_000L, 9_999_999_999L);
     }
 }

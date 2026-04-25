@@ -2,57 +2,39 @@ package com.example.trainbooking.module.trip.domain;
 
 import com.example.trainbooking.module.station.domain.Station;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="trip")
+@Table(name = "trip")
 @NoArgsConstructor
 @Getter
-    public class Trip {
+public class Trip {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "trip_id")
-        private Long tripId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "trip_id")
+    private Long tripId;
 
-        @Column(name = "train_no")
-        private Long trainNo;
+    @Column(name = "train_no")
+    private Long trainNo;
 
-        // 차후를 위한 FK
-//    @Column(name = "from_station_id")
-//    private Long fromStationId;
-//
-//    @Column(name = "to_station_id")
-//    private Long toStationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_station_id")
+    private Station fromStation;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "from_station_id")
-        private Station fromStation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_station_id")
+    private Station toStation;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "to_station_id")
-        private Station toStation;
-
-
-        @Column(name = "departure_time")
-        private LocalDateTime departureTime;
-
-        @Column(name = "arrival_time")
-        private LocalDateTime  arrivalTime;
-
-    @Builder
-    public Trip(Long trainNo, Station fromStation, Station toStation, LocalDateTime departureTime, LocalDateTime arrivalTime) {
-        this.trainNo = trainNo;
-        this.fromStation = fromStation;
-        this.toStation = toStation;
-        this.departureTime = departureTime;
-        this.arrivalTime = arrivalTime;
-    }
-
+    /**
+     * @Embedded: TripSchedule은 값 타입(@Embeddable)이며 Trip 테이블의 컬럼으로 매핑된다.
+     * 객체 지향적으로 스케줄 관련 로직(도착 전 검증 등)을 TripSchedule에 위임할 수 있다.
+     */
+    @Embedded
+    private TripSchedule schedule;
 
     public static Trip create(
             Long trainNo,
@@ -60,9 +42,8 @@ import java.time.LocalDateTime;
             Station toStation,
             LocalDateTime departureTime,
             LocalDateTime arrivalTime
-    ){
-
-        if(fromStation.equals(toStation)) {
+    ) {
+        if (fromStation.equals(toStation)) {
             throw new IllegalArgumentException("출발역과 도착역이 같습니다.");
         }
 
@@ -70,10 +51,16 @@ import java.time.LocalDateTime;
         trip.trainNo = trainNo;
         trip.fromStation = fromStation;
         trip.toStation = toStation;
-        trip.departureTime = departureTime;
-        trip.arrivalTime = arrivalTime;
+        trip.schedule = new TripSchedule(departureTime, arrivalTime);
 
         return trip;
+    }
 
-    };
+    public LocalDateTime getDepartureTime() {
+        return schedule.getDepartureTime();
+    }
+
+    public LocalDateTime getArrivalTime() {
+        return schedule.getArrivalTime();
+    }
 }
