@@ -1,5 +1,6 @@
 package com.example.trainbooking.module.payment.domain;
 
+import com.example.trainbooking.common.BaseEntity;
 import com.example.trainbooking.module.booking.domain.Booking;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,39 +8,32 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Payment {
+public class Payment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="payment_id")
+    @Column(name = "payment_id")
     private Long paymentId;
 
-//    @Column(name="booking_id")
-    @ManyToOne
-    @JoinColumn(name="booking_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id")
     private Booking booking;
 
-    @Column(name="amonut")
+    @Column(name = "amount")
     private int amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="status")
+    @Column(name = "status")
     private PaymentStatus status;
 
-    @Column(name="paid_at")
-    private Timestamp paidAt;
-
     @Builder
-    public Payment(Booking booking, int amount, PaymentStatus status, Timestamp paidAt) {
+    public Payment(Booking booking, int amount, PaymentStatus status) {
         this.booking = booking;
         this.amount = amount;
         this.status = status;
-        this.paidAt = paidAt;
     }
 
     public void ready() {
@@ -54,8 +48,15 @@ public class Payment {
         this.status = PaymentStatus.FAILED;
     }
 
-    public void cancled() {
-        this.status = PaymentStatus.CANCLED;
+    public void canceled() {
+        this.status = PaymentStatus.CANCELED;
     }
 
+    public static Payment create(Booking booking, int amount) {
+        return Payment.builder()
+                .booking(booking)
+                .amount(amount)
+                .status(PaymentStatus.READY)
+                .build();
+    }
 }

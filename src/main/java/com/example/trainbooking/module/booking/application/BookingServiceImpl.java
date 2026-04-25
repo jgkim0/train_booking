@@ -6,6 +6,7 @@ import com.example.trainbooking.module.booking.infrastructure.BookingRepository;
 import com.example.trainbooking.module.booking.presentation.dto.BookingRequest;
 import com.example.trainbooking.module.booking.presentation.dto.BookingResponse;
 import com.example.trainbooking.module.payment.application.PaymentsService;
+import com.example.trainbooking.module.seat.application.SeatService;
 import com.example.trainbooking.module.seat.domain.Seat;
 import com.example.trainbooking.module.seat.domain.SeatRepository;
 import com.example.trainbooking.module.trip.domain.Trip;
@@ -26,6 +27,7 @@ public class BookingServiceImpl implements BookingService {
     private final SeatRepository seatRepository;
 
     private final PaymentsService paymentsService;
+    private final SeatService seatService;
 
     @Override
     public BookingResponse findBooking(Long id) {
@@ -38,13 +40,12 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponse createBooking(BookingRequest bookingRequest) {
 
-        Trip trip = tripRepository.getReferenceById(bookingRequest.getTripId());
+        Trip trip = tripRepository.findById(bookingRequest.getTripId()).orElseThrow(()-> new EntityNotFoundException("조회된 여행정보가 없습니다."));
 
-        Seat seat = seatRepository.findById(bookingRequest.getSeatId())
+        Seat seat = seatRepository.findByIdWithLock(bookingRequest.getSeatId())
                                     .orElseThrow(()-> new EntityNotFoundException("조회된 좌석 정보가 없습니다."));
 
         seat.checkBeforeBook();
-
         seat.book();
 
         Booking booking = Booking.create(
@@ -54,6 +55,8 @@ public class BookingServiceImpl implements BookingService {
         );
 
         bookingRepository.save(booking);
+
+        paymentsService.createPayment(booking.getBookingId());
 
         return BookingResponse.from(booking);
     }
@@ -69,8 +72,9 @@ public class BookingServiceImpl implements BookingService {
             paymentsService.cancelPaymentByBooking(bookingId);
         }
 
-        saved.cancle();
+        seatService.canceledBookingSeat(saved.getSeat().getSeatId());
 
+        saved.cancel();
 
     }
 

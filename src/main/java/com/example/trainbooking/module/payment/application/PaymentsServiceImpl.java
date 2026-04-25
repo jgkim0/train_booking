@@ -4,7 +4,6 @@ import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.booking.infrastructure.BookingRepository;
 import com.example.trainbooking.module.payment.domain.Payment;
 import com.example.trainbooking.module.payment.domain.PaymentRepository;
-import com.example.trainbooking.module.payment.domain.PaymentStatus;
 import com.example.trainbooking.module.payment.presentation.dto.PaymentResponse;
 import com.example.trainbooking.module.ticket.application.TicketService;
 import com.example.trainbooking.module.ticket.presentation.dto.TicketRequest;
@@ -24,19 +23,23 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public void createPayment(Long bookingId) {
+    public PaymentResponse createPayment(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                             .orElseThrow(() -> new IllegalArgumentException("예약 건이 없습니다."));
 
-        Payment payment = Payment.builder()
-                                .booking(booking)
-                                .amount(5800)
-                                .status(PaymentStatus.READY)
-                                .paidAt(null)
-                                .build();
+        checkAlreadyPaymentLog(bookingId);
 
-        paymentRepository.save(payment);
+        Payment payment = Payment.create(booking, 5800);
+
+        return PaymentResponse.from(paymentRepository.save(payment));
+    }
+
+    private void checkAlreadyPaymentLog(Long bookingId) {
+
+        if (paymentRepository.existsByBooking_BookingId(bookingId)) {
+            throw new IllegalStateException("이미 결제가 생성된 예약입니다.");
+        }
     }
 
     @Override
@@ -77,7 +80,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         Payment payment = paymentRepository.findById(paymentId)
                                         .orElseThrow(()->new IllegalArgumentException("취소할 결제내역이 없습니다."));
-        payment.cancled();
+        payment.canceled();
     }
 
     @Override
@@ -86,7 +89,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         Payment payment = paymentRepository.findByBooking_BookingId(bookingId)
                             .orElseThrow(() -> new IllegalArgumentException("취소할 결제내역이 없습니다."));
 
-        payment.cancled();
+        payment.canceled();
 
     }
 

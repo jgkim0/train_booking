@@ -1,36 +1,35 @@
 package com.example.trainbooking.module.payment.presentation.dto;
 
-import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.payment.domain.Payment;
 import com.example.trainbooking.module.payment.domain.PaymentStatus;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 public class PaymentResponse {
 
     private Long paymentId;
-    private Booking booking;
+    private Long bookingId;
     private int amount;
     private PaymentStatus status;
-    private Timestamp paidAt;
+    private LocalDateTime createdAt;
 
-    public PaymentResponse(Long paymentId, Booking booking, int amount, PaymentStatus status, Timestamp paidAt) {
+    public PaymentResponse(Long paymentId, Long bookingId, int amount, PaymentStatus status, LocalDateTime createdAt) {
         this.paymentId = paymentId;
-        this.booking = booking;
+        this.bookingId = bookingId;
         this.amount = amount;
         this.status = status;
-        this.paidAt = paidAt;
+        this.createdAt = createdAt;
     }
 
     public static PaymentResponse from(Payment payment) {
         return new PaymentResponse(
                 payment.getPaymentId(),
-                payment.getBooking(),
+                payment.getBooking().getBookingId(),
                 payment.getAmount(),
                 payment.getStatus(),
-                payment.getPaidAt()
+                payment.getCreatedAt()
         );
     }
 }

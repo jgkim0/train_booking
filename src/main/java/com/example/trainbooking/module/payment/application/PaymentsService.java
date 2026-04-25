@@ -4,7 +4,7 @@ import com.example.trainbooking.module.payment.presentation.dto.PaymentResponse;
 
 public interface PaymentsService {
 
-    void createPayment(Long tirpId);
+    PaymentResponse createPayment(Long tirpId);
 
     void approvePayment(Long paymentId);
 

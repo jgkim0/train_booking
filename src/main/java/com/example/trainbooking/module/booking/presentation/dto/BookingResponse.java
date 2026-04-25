@@ -2,40 +2,37 @@ package com.example.trainbooking.module.booking.presentation.dto;
 
 import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.booking.domain.BookingStatus;
-import com.example.trainbooking.module.seat.domain.Seat;
-import com.example.trainbooking.module.trip.domain.Trip;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 public class BookingResponse {
 
     private Long bookingId;
     private Long userId;
-    private Trip trip;
+    private Long tripId;
     private BookingStatus status;
-    private Timestamp createdDt;
-    private Seat seat;
+    private LocalDateTime createdAt;
+    private Long seatId;
 
-    public BookingResponse(Long bookingId, Long userId, Trip trip, BookingStatus status, Timestamp createdDt, Seat seat) {
+    public BookingResponse(Long bookingId, Long userId, Long tripId, BookingStatus status, LocalDateTime createdAt, Long seatId) {
         this.bookingId = bookingId;
         this.userId = userId;
-        this.trip = trip;
+        this.tripId = tripId;
         this.status = status;
-        this.createdDt = createdDt;
-        this.seat = seat;
+        this.createdAt = createdAt;
+        this.seatId = seatId;
     }
-
 
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(
                 booking.getBookingId(),
                 booking.getUserId(),
-                booking.getTrip(),
+                booking.getTrip().getTripId(),
                 booking.getStatus(),
-                booking.getCreatedDt(),
-                booking.getSeat()
+                booking.getCreatedAt(),
+                booking.getSeat().getSeatId()
         );
     }
 }
