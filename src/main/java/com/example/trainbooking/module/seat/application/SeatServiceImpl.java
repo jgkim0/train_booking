@@ -35,5 +35,15 @@ public class SeatServiceImpl implements SeatService {
         return SeatResponse.from(seatInfo);
     }
 
+    @Override
+    @Transactional
+    public SeatResponse canceledBookingSeat(Long seatId) {
+        Seat seatInfo = seatRepository.findById(seatId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 좌석번호입니다."));
+
+        seatInfo.cancel();
+
+        return SeatResponse.from(seatInfo);
+    }
+
 
 }

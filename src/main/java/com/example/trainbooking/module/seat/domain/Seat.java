@@ -27,7 +27,7 @@ public class Seat {
     @Column(name="status")
     private SeatStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="trip_id")
     private Trip trip;
 
@@ -44,12 +44,10 @@ public class Seat {
         if (this.status != SeatStatus.AVAILABLE) {
             throw new IllegalStateException("이미 예약된 좌석입니다.");
         }
-        this.status = SeatStatus.BOOKED;
     }
 
-        public void cancle() {
+    public void cancel() {
         this.status = SeatStatus.CANCELLED;
-        this.release();
     }
 
     public void release() {

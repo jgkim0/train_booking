@@ -9,4 +9,6 @@ public interface SeatService {
     public List<SeatResponse> findAvailableSeats(Long tripId);
 
     public SeatResponse findTripSeatInfo(Long seatId);
+
+    SeatResponse canceledBookingSeat(Long seatId);
 }

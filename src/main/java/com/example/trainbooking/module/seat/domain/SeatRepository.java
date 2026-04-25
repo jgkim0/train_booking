@@ -3,6 +3,8 @@ package com.example.trainbooking.module.seat.domain;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,17 +15,12 @@ import java.util.Optional;
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 
-    // 동시성 문제??
+    // 예약 시에만 비관적 락 적용 — 일반 findById는 JpaRepository 기본 메서드(락 없음) 사용
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Seat> findById(Long seatId);
+    @Query("select s from Seat s where s.seatId = :seatId")
+    Optional<Seat> findByIdWithLock(@Param("seatId") Long seatId);
 
     List<Seat> findByTrip_TripIdAndStatus(Long tripId, SeatStatus status);
 
-    // 예매 가능한 좌석 카운트
     Long countByTrip_TripIdAndStatus(Long tripId, SeatStatus status);
-
-    // 좌석 상태 업데이트
-    // JPA 더티 체킹 활용하여 BookingService createBook 에서 처리.
-
-
 }
