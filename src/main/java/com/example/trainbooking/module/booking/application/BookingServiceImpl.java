@@ -1,5 +1,6 @@
 package com.example.trainbooking.module.booking.application;
 
+import com.example.trainbooking.common.exception.BookingException;
 import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.booking.domain.BookingStatus;
 import com.example.trainbooking.module.booking.infrastructure.BookingRepository;
@@ -21,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-
     private final TripRepository tripRepository;
-
     private final SeatRepository seatRepository;
 
     private final PaymentsService paymentsService;
@@ -45,6 +44,7 @@ public class BookingServiceImpl implements BookingService {
         Seat seat = seatRepository.findByIdWithLock(bookingRequest.getSeatId())
                                     .orElseThrow(()-> new EntityNotFoundException("조회된 좌석 정보가 없습니다."));
 
+        // 좌석 점유
         seat.checkBeforeBook();
         seat.book();
 
@@ -56,15 +56,16 @@ public class BookingServiceImpl implements BookingService {
 
         bookingRepository.save(booking);
 
+        // 결제 대기 생성
         paymentsService.createPayment(booking.getBookingId());
 
         return BookingResponse.from(booking);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public void cancelBooking(Long bookingId) {
-        Booking saved = bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException("조회된 예약건이 없습니다."));
+        Booking saved = bookingRepository.findById(bookingId).orElseThrow(()->new BookingException("조회된 예약건이 없습니다."));
 
         saved.validateCancelable();
 
@@ -75,6 +76,8 @@ public class BookingServiceImpl implements BookingService {
         seatService.canceledBookingSeat(saved.getSeat().getSeatId());
 
         saved.cancel();
+
+        saved.getSeat().release();
 
     }
 
