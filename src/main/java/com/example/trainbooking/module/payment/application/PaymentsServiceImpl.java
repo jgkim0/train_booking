@@ -1,5 +1,8 @@
 package com.example.trainbooking.module.payment.application;
 
+import com.example.trainbooking.common.exception.BookingNotFoundException;
+import com.example.trainbooking.common.exception.DuplicationBookingException;
+import com.example.trainbooking.common.exception.PaymentNotFoundException;
 import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.booking.infrastructure.BookingRepository;
 import com.example.trainbooking.module.payment.domain.Payment;
@@ -26,7 +29,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     public PaymentResponse createPayment(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                            .orElseThrow(() -> new IllegalArgumentException("예약 건이 없습니다."));
+                            .orElseThrow(() -> new BookingNotFoundException("조회된 예약 건이 없습니다."));
 
         checkAlreadyPaymentLog(bookingId);
 
@@ -38,7 +41,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private void checkAlreadyPaymentLog(Long bookingId) {
 
         if (paymentRepository.existsByBooking_BookingId(bookingId)) {
-            throw new IllegalStateException("이미 결제가 생성된 예약입니다.");
+            throw new DuplicationBookingException("동일한 예약 건이 있습니다.");
         }
     }
 
@@ -46,7 +49,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Transactional
     public void approvePayment(Long paymentId) {
 
-        Payment target = paymentRepository.findById(paymentId).orElseThrow(()->new IllegalArgumentException("조회된 결제 건이 없습니다."));
+        Payment target = paymentRepository.findById(paymentId).orElseThrow(()->new PaymentNotFoundException("조회된 결제 건이 없습니다."));
 
         // 결제 승인 상태 변경
         target.approved();
@@ -69,7 +72,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Transactional(readOnly = true)
     public PaymentResponse getPaymentInfo(Long paymentId) {
 
-        Payment payment = paymentRepository.findById(paymentId).orElseThrow(()-> new IllegalArgumentException("조회된 결제 건이 없습니다."));
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(()-> new PaymentNotFoundException("조회된 결제 건이 없습니다."));
         return PaymentResponse.from(payment);
     }
 
@@ -77,9 +80,8 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Transactional
     public void cancelPayment(Long paymentId) {
 
-
         Payment payment = paymentRepository.findById(paymentId)
-                                        .orElseThrow(()->new IllegalArgumentException("취소할 결제내역이 없습니다."));
+                                        .orElseThrow(()->new PaymentNotFoundException("취소할 결제내역이 없습니다."));
         payment.canceled();
     }
 
@@ -87,7 +89,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     public void cancelPaymentByBooking(Long bookingId) {
 
         Payment payment = paymentRepository.findByBooking_BookingId(bookingId)
-                            .orElseThrow(() -> new IllegalArgumentException("취소할 결제내역이 없습니다."));
+                            .orElseThrow(() -> new PaymentNotFoundException("취소할 결제내역이 없습니다."));
 
         payment.canceled();
 

@@ -1,5 +1,6 @@
 package com.example.trainbooking.module.trip.application;
 
+ import com.example.trainbooking.common.exception.TripNotFoundException;
 import com.example.trainbooking.module.station.domain.Station;
 import com.example.trainbooking.module.station.domain.StationRepository;
 import com.example.trainbooking.module.trip.domain.Trip;
@@ -22,28 +23,24 @@ public class TripServiceImpl implements TripService{
     @Override
     public List<TripResponse> getTripList() {
 
-        List<TripResponse> responses = tripRepository.findAll().stream().map(TripResponse::from).toList();
-
-        return responses;
+        return tripRepository.findAll().stream().map(TripResponse::from).toList();
     }
 
     @Override
     public TripResponse getTrip(Long id) {
 
-        TripResponse response = TripResponse.from(tripRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Trip 없음")));
-
-        return response;
+        return TripResponse.from(tripRepository.findById(id)
+                .orElseThrow(() -> new TripNotFoundException("Trip 없음")));
     }
 
     @Override
     public TripResponse createTrip(TripRequest request) {
 
-        Station fromStation = stationRepository.getReferenceById(request.getFromStationId());
-        Station toStation = stationRepository.getReferenceById(request.getToStationId());
+        Station fromStation = stationRepository.getReferenceById(request.fromStationId());
+        Station toStation = stationRepository.getReferenceById(request.toStationId());
 
         // 생성자 방식
-        Trip trip = Trip.create(request.getTrainNo(), fromStation, toStation, request.getDepartureTime(), request.getArrivalTime());
+        Trip trip = Trip.create(request.trainNo(), fromStation, toStation, request.departureTime(), request.arrivalTime());
         Trip saved = tripRepository.save(trip);
 
         return TripResponse.from(saved);

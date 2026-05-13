@@ -1,6 +1,8 @@
 package com.example.trainbooking.module.booking.application;
 
-import com.example.trainbooking.common.exception.BookingException;
+import com.example.trainbooking.common.exception.BookingNotFoundException;
+import com.example.trainbooking.common.exception.SeatNotFoundException;
+import com.example.trainbooking.common.exception.TripNotFoundException;
 import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.booking.domain.BookingStatus;
 import com.example.trainbooking.module.booking.infrastructure.BookingRepository;
@@ -12,7 +14,6 @@ import com.example.trainbooking.module.seat.domain.Seat;
 import com.example.trainbooking.module.seat.domain.SeatRepository;
 import com.example.trainbooking.module.trip.domain.Trip;
 import com.example.trainbooking.module.trip.domain.TripRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponse findBooking(Long id) {
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking 없음"));
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new BookingNotFoundException("조회된 예약건이 없습니다."));
 
         return BookingResponse.from(booking);
     }
@@ -39,17 +40,17 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponse createBooking(BookingRequest bookingRequest) {
 
-        Trip trip = tripRepository.findById(bookingRequest.getTripId()).orElseThrow(()-> new EntityNotFoundException("조회된 여행정보가 없습니다."));
+        Trip trip = tripRepository.findById(bookingRequest.tripId()).orElseThrow(()-> new TripNotFoundException("조회된 여행정보가 없습니다."));
 
-        Seat seat = seatRepository.findByIdWithLock(bookingRequest.getSeatId())
-                                    .orElseThrow(()-> new EntityNotFoundException("조회된 좌석 정보가 없습니다."));
+        Seat seat = seatRepository.findByIdWithLock(bookingRequest.seatId())
+                                    .orElseThrow(()-> new SeatNotFoundException("조회된 좌석 정보가 없습니다."));
 
         // 좌석 점유
         seat.checkBeforeBook();
         seat.book();
 
         Booking booking = Booking.create(
-                bookingRequest.getUserId(),
+                bookingRequest.userId(),
                 trip,
                 seat
         );
@@ -65,7 +66,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void cancelBooking(Long bookingId) {
-        Booking saved = bookingRepository.findById(bookingId).orElseThrow(()->new BookingException("조회된 예약건이 없습니다."));
+        Booking saved = bookingRepository.findById(bookingId).orElseThrow(()->new BookingNotFoundException("조회된 예약건이 없습니다."));
 
         saved.validateCancelable();
 

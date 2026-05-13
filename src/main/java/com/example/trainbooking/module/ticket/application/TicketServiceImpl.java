@@ -24,8 +24,8 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public void createTicket(TicketRequest ticketRequest) {
-        Booking booked = bookingRepository.getReferenceById(ticketRequest.getBooking());
-        Seat seat = seatRepository.getReferenceById(ticketRequest.getSeatId());
+        Booking booked = bookingRepository.getReferenceById(ticketRequest.booking());
+        Seat seat = seatRepository.getReferenceById(ticketRequest.seatId());
 
         Ticket newTicket = Ticket.builder()
                 .booking(booked)

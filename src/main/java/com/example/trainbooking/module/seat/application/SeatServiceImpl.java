@@ -1,6 +1,6 @@
 package com.example.trainbooking.module.seat.application;
 
-
+import com.example.trainbooking.common.exception.SeatNotFoundException;
 import com.example.trainbooking.module.seat.domain.Seat;
 import com.example.trainbooking.module.seat.domain.SeatRepository;
 import com.example.trainbooking.module.seat.domain.SeatStatus;
@@ -22,15 +22,13 @@ public class SeatServiceImpl implements SeatService {
     public List<SeatResponse> findAvailableSeats(Long tripId) {
         List<Seat> seatList = seatRepository.findByTrip_TripIdAndStatus(tripId, SeatStatus.AVAILABLE);
 
-        List<SeatResponse> response = seatList.stream().map(SeatResponse::from).toList();
-
-        return response;
+        return seatList.stream().map(SeatResponse::from).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public SeatResponse findTripSeatInfo(Long seatId) {
-        Seat seatInfo = seatRepository.findById(seatId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 좌석번호입니다."));
+        Seat seatInfo = seatRepository.findById(seatId).orElseThrow(()-> new SeatNotFoundException("존재하지 않는 좌석번호입니다."));
 
         return SeatResponse.from(seatInfo);
     }
@@ -38,7 +36,7 @@ public class SeatServiceImpl implements SeatService {
     @Override
     @Transactional
     public SeatResponse canceledBookingSeat(Long seatId) {
-        Seat seatInfo = seatRepository.findById(seatId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 좌석번호입니다."));
+        Seat seatInfo = seatRepository.findById(seatId).orElseThrow(()-> new SeatNotFoundException("존재하지 않는 좌석번호입니다."));
 
         seatInfo.cancel();
 
