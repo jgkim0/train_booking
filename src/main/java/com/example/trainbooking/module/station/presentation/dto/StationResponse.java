@@ -1,20 +1,20 @@
 package com.example.trainbooking.module.station.presentation.dto;
 
 import com.example.trainbooking.module.station.domain.Station;
-import lombok.Getter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
-public class StationResponse {
+public record StationResponse(
 
-    private Long stationId;
-    private String stationName;
+        @NotNull
+        Long stationId,
 
-    public StationResponse(Long stationId, String stationName) {
-        this.stationId = stationId;
-        this.stationName = stationName;
-    }
+        @NotBlank
+        String stationName
 
-    public static StationResponse from(Station station){
+) {
+
+    public static StationResponse from(Station station) {
         return new StationResponse(
                 station.getStationId(),
                 station.getStationName()

@@ -1,15 +1,14 @@
 package com.example.trainbooking.module.ticket.presentation.dto;
 
-import lombok.Getter;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
-public class TicketRequest {
+public record TicketRequest(
 
-    private Long booking;
-    private Long seatId;
+        @NotNull
+        Long booking,
 
-    public TicketRequest(Long booking, Long seatId) {
-        this.booking = booking;
-        this.seatId = seatId;
-    }
+        @NotNull
+        Long seatId
+) {
+
 }
