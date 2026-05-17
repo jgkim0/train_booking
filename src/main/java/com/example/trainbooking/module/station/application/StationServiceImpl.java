@@ -5,6 +5,7 @@ import com.example.trainbooking.module.station.domain.StationRepository;
 import com.example.trainbooking.module.station.presentation.dto.StationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class StationServiceImpl implements StationService {
     private final StationRepository stationRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<StationResponse> getStationList() {
         return stationRepository.findAll().stream()
                 .map(StationResponse::from)
@@ -22,6 +24,7 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public StationResponse getStationInfo(Long id) {
         return StationResponse.from(stationRepository.findById(id)
                 .orElseThrow(() -> new StationNotFoundException("출발역이 존재하지 않습니다.")));

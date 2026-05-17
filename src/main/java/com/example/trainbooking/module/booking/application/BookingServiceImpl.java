@@ -30,6 +30,7 @@ public class BookingServiceImpl implements BookingService {
     private final SeatService seatService;
 
     @Override
+    @Transactional(readOnly = true)
     public BookingResponse findBooking(Long id) {
         Booking booking = bookingRepository.findById(id).orElseThrow(() -> new BookingNotFoundException("조회된 예약건이 없습니다."));
 
@@ -66,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void cancelBooking(Long bookingId) {
-        Booking saved = bookingRepository.findById(bookingId).orElseThrow(()->new BookingNotFoundException("조회된 예약건이 없습니다."));
+        Booking saved = bookingRepository.findByIdWithLock(bookingId).orElseThrow(() -> new BookingNotFoundException("조회된 예약 건이 없습니다."));
 
         saved.validateCancelable();
 
@@ -77,8 +78,6 @@ public class BookingServiceImpl implements BookingService {
         seatService.canceledBookingSeat(saved.getSeat().getSeatId());
 
         saved.cancel();
-
-        saved.getSeat().release();
 
     }
 

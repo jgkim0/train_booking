@@ -3,7 +3,10 @@ package com.example.trainbooking.module.booking.presentation;
 import com.example.trainbooking.module.booking.application.BookingService;
 import com.example.trainbooking.module.booking.presentation.dto.BookingRequest;
 import com.example.trainbooking.module.booking.presentation.dto.BookingResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +17,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingResponse createBooking(@RequestBody BookingRequest bookingRequest){
+    public BookingResponse createBooking(@RequestBody @Valid BookingRequest bookingRequest){
         return bookingService.createBooking(bookingRequest);
     }
 
@@ -24,8 +27,10 @@ public class BookingController {
     }
 
     @DeleteMapping("/{bookingId}")
-    public void cancelBooking(@PathVariable Long bookingId) {
+    public ResponseEntity<Void> cancelBooking(@PathVariable Long bookingId) {
         bookingService.cancelBooking(bookingId);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
