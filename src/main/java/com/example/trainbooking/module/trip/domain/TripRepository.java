@@ -2,6 +2,7 @@ package com.example.trainbooking.module.trip.domain;
 
 import com.example.trainbooking.module.trip.presentation.dto.TripResponse;
 import com.example.trainbooking.module.trip.presentation.dto.TripSelectOptions;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,10 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip, Long> {
 
     Optional<Trip> findById(Long id);
+
+    @Override
+    @EntityGraph(attributePaths = {"fromStation", "toStation"})
+    List<Trip> findAll();
 
     // @Embedded 값 타입 경로: t.schedule.departureTime
     @Query("""

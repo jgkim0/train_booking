@@ -1,6 +1,8 @@
 package com.example.trainbooking.module.booking.domain;
 
 import com.example.trainbooking.common.BaseEntity;
+ import com.example.trainbooking.common.exception.BookingNotFoundException;
+import com.example.trainbooking.common.exception.DuplicationBookingException;
 import com.example.trainbooking.module.seat.domain.Seat;
 import com.example.trainbooking.module.trip.domain.Trip;
 import jakarta.persistence.*;
@@ -66,7 +68,7 @@ public class Booking extends BaseEntity {
 
     public void validateCancelable() {
         if (status == BookingStatus.CANCELED) {
-            throw new IllegalStateException("이미 취소된 예약입니다.");
+            throw new BookingNotFoundException("이미 취소된 예약입니다.");
         }
     }
 }

@@ -7,10 +7,12 @@ import com.example.trainbooking.module.trip.domain.Trip;
 import com.example.trainbooking.module.trip.domain.TripRepository;
 import com.example.trainbooking.module.trip.presentation.dto.TripRequest;
 import com.example.trainbooking.module.trip.presentation.dto.TripResponse;
-import lombok.RequiredArgsConstructor;
+  import jakarta.validation.Valid;
+ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -21,12 +23,14 @@ public class TripServiceImpl implements TripService{
     private final StationRepository stationRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<TripResponse> getTripList() {
 
         return tripRepository.findAll().stream().map(TripResponse::from).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TripResponse getTrip(Long id) {
 
         return TripResponse.from(tripRepository.findById(id)
@@ -34,7 +38,8 @@ public class TripServiceImpl implements TripService{
     }
 
     @Override
-    public TripResponse createTrip(TripRequest request) {
+    @Transactional
+    public TripResponse createTrip(@Valid TripRequest request) {
 
         Station fromStation = stationRepository.getReferenceById(request.fromStationId());
         Station toStation = stationRepository.getReferenceById(request.toStationId());
