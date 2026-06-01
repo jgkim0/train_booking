@@ -41,6 +41,10 @@ public class Payment extends BaseEntity {
     }
 
     public void approved() {
+        // 상태 검증 코드 추가
+        if ( this.status != PaymentStatus.READY){
+            throw new IllegalStateException("승인 가능한 상태가 아닙니다.");
+        }
         this.status = PaymentStatus.APPROVED;
     }
 
@@ -49,6 +53,10 @@ public class Payment extends BaseEntity {
     }
 
     public void canceled() {
+        // 상태 검증 코드 추가
+        if ( this.status != PaymentStatus.APPROVED ){
+            throw new IllegalStateException("취소 가능한 상태가 아닙니다.");
+        }
         this.status = PaymentStatus.CANCELED;
     }
 

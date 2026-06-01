@@ -1,6 +1,7 @@
 package com.example.trainbooking.module.seat.domain;
 
 
+import com.example.trainbooking.common.exception.DuplicationBookingException;
 import com.example.trainbooking.module.trip.domain.Trip;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,12 +43,8 @@ public class Seat {
 
     public void checkBeforeBook() {
         if (this.status != SeatStatus.AVAILABLE) {
-            throw new IllegalStateException("이미 예약된 좌석입니다.");
+            throw new DuplicationBookingException("이미 예약된 좌석입니다.");
         }
-    }
-
-    public void cancel() {
-        this.status = SeatStatus.CANCELLED;
     }
 
     public void release() {

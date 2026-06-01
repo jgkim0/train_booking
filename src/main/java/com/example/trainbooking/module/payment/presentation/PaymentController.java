@@ -1,9 +1,10 @@
 package com.example.trainbooking.module.payment.presentation;
 
-import com.example.trainbooking.module.booking.application.BookingService;
 import com.example.trainbooking.module.payment.application.PaymentsService;
 import com.example.trainbooking.module.payment.presentation.dto.PaymentResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,14 +25,13 @@ public class PaymentController {
     }
 
     @PatchMapping("/payments/{paymentId}")
-    public void approvePayment(@PathVariable Long paymentId) {
+    public ResponseEntity<Void> approvePayment(@PathVariable Long paymentId) {
+
         paymentsService.approvePayment(paymentId);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-//    @DeleteMapping("/payments/{paymentId}")
-//    public void cancledPayment(@PathVariable Long paymentId) {
-//        paymentsService.cancledPayment(paymentId);
-//    }
 
 
 }
