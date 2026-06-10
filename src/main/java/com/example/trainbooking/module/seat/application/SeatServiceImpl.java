@@ -1,5 +1,6 @@
 package com.example.trainbooking.module.seat.application;
 
+import com.example.trainbooking.common.exception.AlreadyEmptySeatException;
 import com.example.trainbooking.common.exception.SeatNotFoundException;
 import com.example.trainbooking.module.seat.domain.Seat;
 import com.example.trainbooking.module.seat.domain.SeatRepository;
@@ -38,8 +39,11 @@ public class SeatServiceImpl implements SeatService {
     public SeatResponse canceledBookingSeat(Long seatId) {
         Seat seatInfo = seatRepository.findById(seatId).orElseThrow(()-> new SeatNotFoundException("존재하지 않는 좌석번호입니다."));
 
-        seatInfo.cancel();
+        if (seatInfo.getStatus() == SeatStatus.AVAILABLE) {
+            throw new AlreadyEmptySeatException("이미 빈 좌석입니다.");
+        }
 
+        seatInfo.release();
         return SeatResponse.from(seatInfo);
     }
 
