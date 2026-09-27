@@ -1,0 +1,21 @@
+@startuml
+actor User
+
+User -> BookingController : DELETE /bookings/{id}
+
+BookingController -> BookingService : cancelBooking()
+
+BookingService -> BookingRepository : findById(bookingId)
+BookingRepository --> BookingService : Booking
+
+BookingService -> Booking : status CANCELED
+
+BookingService -> SeatRepository : findById(seatId)
+SeatRepository --> BookingService : Seat
+
+BookingService -> Seat : status AVAILABLE
+
+BookingService --> BookingController : success
+BookingController --> User : OK
+
+@enduml

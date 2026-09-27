@@ -1,0 +1,22 @@
+@startuml
+actor User
+
+User -> PaymentController : POST /payments/{id}/approve
+PaymentController -> PaymentService : approvePayment(paymentId)
+
+PaymentService -> PaymentRepository : findById(paymentId)
+PaymentRepository --> PaymentService : Payment
+
+PaymentService -> Payment : status APPROVED
+
+PaymentService -> BookingRepository : findById(bookingId)
+BookingRepository --> PaymentService : Booking
+
+PaymentService -> Booking : status PAID
+
+PaymentService -> TicketRepository : save(Ticket)
+
+PaymentService --> PaymentController : success
+PaymentController --> User : OK
+
+@enduml

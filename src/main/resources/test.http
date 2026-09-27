@@ -1,14 +1,24 @@
+### 예약 조회
+GET http://localhost:8080/bookings/3
+
+
 ### 예약 생성
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
 {
+  "userId" : 1,
   "tripId": 1,
-  "seatId": 3,
-
+  "seatId": 6
 }
 
 
+### 결제 시도
+PATCH http://localhost:8080/payments/5
+Content-Type: application/json
 
-###
-GET http://localhost:8080/seats/1
+
+
+### 예약 취소
+DELETE http://localhost:8080/bookings/68
+
