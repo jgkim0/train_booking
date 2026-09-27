@@ -17,7 +17,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingResponse createBooking(@RequestBody @Valid BookingRequest bookingRequest){
+    public BookingResponse createBooking(@RequestBody @Valid BookingRequest bookingRequest) throws InterruptedException {
         return bookingService.createBooking(bookingRequest);
     }
 

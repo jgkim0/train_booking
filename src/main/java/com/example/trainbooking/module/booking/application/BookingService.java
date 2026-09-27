@@ -6,9 +6,9 @@ import com.example.trainbooking.module.booking.presentation.dto.BookingResponse;
 
 public interface BookingService {
 
-    BookingResponse findBooking(Long id);
+    BookingResponse findBooking(Long id) ;
 
-    BookingResponse createBooking(BookingRequest bookingRequest);
+    BookingResponse createBooking(BookingRequest bookingRequest) throws InterruptedException;
 
     void cancelBooking(Long bookingId);
 }

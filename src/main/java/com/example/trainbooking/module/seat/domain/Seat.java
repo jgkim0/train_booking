@@ -32,8 +32,8 @@ public class Seat {
     @JoinColumn(name="trip_id")
     private Trip trip;
 
-    @Version
-    private Long version;
+//    @Version
+//    private Long version;
 
     public Seat(Long seatNo, SeatStatus status, Trip trip) {
         this.seatNo = seatNo;

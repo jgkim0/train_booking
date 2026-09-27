@@ -68,7 +68,7 @@ public class Booking extends BaseEntity {
 
     public void validateCancelable() {
         if (status == BookingStatus.CANCELED) {
-            throw new BookingNotFoundException("이미 취소된 예약입니다.");
+            throw new BookingNotFoundException("예약된 사항이 없습니다.");
         }
     }
 }

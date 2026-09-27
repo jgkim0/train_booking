@@ -39,12 +39,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponse createBooking(BookingRequest bookingRequest) {
+    public BookingResponse createBooking(BookingRequest bookingRequest) throws InterruptedException {
 
         Trip trip = tripRepository.findById(bookingRequest.tripId()).orElseThrow(()-> new TripNotFoundException("조회된 여행정보가 없습니다."));
 
         Seat seat = seatRepository.findByIdWithLock(bookingRequest.seatId())
                                     .orElseThrow(()-> new SeatNotFoundException("조회된 좌석 정보가 없습니다."));
+
+        // ↓ 이 한 줄만 추가 (read와 write 사이에 틈을 만듦)
+//        Thread.sleep(200);
 
         // 좌석 점유
         seat.checkBeforeBook();

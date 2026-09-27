@@ -20,6 +20,10 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     @Query("select s from Seat s where s.seatId = :seatId")
     Optional<Seat> findByIdWithLock(@Param("seatId") Long seatId);
 
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select s from Seat s where s.seatId = :seatId")
+    Optional<Seat> findById(@Param("seatId") Long seatId);
+
     List<Seat> findByTrip_TripIdAndStatus(Long tripId, SeatStatus status);
 
     Long countByTrip_TripIdAndStatus(Long tripId, SeatStatus status);
