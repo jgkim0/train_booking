@@ -10,6 +10,8 @@ public interface PaymentsService {
 
     PaymentResponse getPaymentInfo(Long paymentId);
 
+    PaymentResponse getPaymentByBooking(Long bookingId);
+
     void cancelPayment(Long bookingId);
 
     void cancelPaymentByBooking(Long bookingId);

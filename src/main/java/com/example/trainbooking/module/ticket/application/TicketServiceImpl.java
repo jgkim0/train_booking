@@ -7,6 +7,7 @@ import com.example.trainbooking.module.seat.domain.SeatRepository;
 import com.example.trainbooking.module.ticket.domain.Ticket;
 import com.example.trainbooking.module.ticket.domain.TicketRepository;
 import com.example.trainbooking.module.ticket.presentation.dto.TicketRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

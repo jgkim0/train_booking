@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header(title)" class="topbar">
+    <a class="brand" th:href="@{/web/trips}">🚄 기차 예매</a>
+    <span class="page-title" th:text="${title}"></span>
+</header>
+</body>
+</html>

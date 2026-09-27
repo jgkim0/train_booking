@@ -77,6 +77,15 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public PaymentResponse getPaymentByBooking(Long bookingId) {
+
+        Payment payment = paymentRepository.findByBooking_BookingId(bookingId)
+                            .orElseThrow(() -> new PaymentNotFoundException("조회된 결제 건이 없습니다."));
+        return PaymentResponse.from(payment);
+    }
+
+    @Override
     @Transactional
     public void cancelPayment(Long paymentId) {
 

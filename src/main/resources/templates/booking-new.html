@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>예매 확인 - 기차 예매</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: header('예매 확인')}"></div>
+
+<main class="container">
+    <div class="summary-card">
+        <div><strong th:text="${trip.trainNo}"></strong>호 열차 · <span th:text="${seat.seatNo}"></span>번 좌석</div>
+        <div th:text="${fromStationName} + ' → ' + ${toStationName}"></div>
+        <div th:text="${#temporals.format(trip.departureTime, 'yyyy-MM-dd HH:mm')} + ' 출발'"></div>
+    </div>
+
+    <form method="post" th:action="@{/web/bookings}" class="booking-form">
+        <input type="hidden" name="tripId" th:value="${trip.tripId}">
+        <input type="hidden" name="seatId" th:value="${seat.seatId}">
+        <label for="userId">회원 번호</label>
+        <input type="number" id="userId" name="userId" required min="1" placeholder="예: 1001">
+        <button type="submit">예매하기</button>
+    </form>
+
+    <a class="link-back" th:href="@{/web/trips/{id}/seats(id=${trip.tripId})}">← 좌석 선택으로</a>
+</main>
+</body>
+</html>

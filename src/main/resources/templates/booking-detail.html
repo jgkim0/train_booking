@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>예매 정보 - 기차 예매</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: header('예매 정보')}"></div>
+
+<main class="container">
+    <p th:if="${errorMessage}" class="error" th:text="${errorMessage}"></p>
+
+    <div class="status-badge" th:classappend="${'status-' + booking.status}" th:text="${booking.status}"></div>
+
+    <div class="summary-card">
+        <div>예매번호 <strong th:text="${booking.bookingId}"></strong></div>
+        <div><strong th:text="${trip.trainNo}"></strong>호 열차 · <span th:text="${seat.seatNo}"></span>번 좌석</div>
+        <div th:text="${fromStationName} + ' → ' + ${toStationName}"></div>
+        <div th:text="${#temporals.format(trip.departureTime, 'yyyy-MM-dd HH:mm')} + ' 출발'"></div>
+        <div>예매자 회원번호: <span th:text="${booking.userId}"></span></div>
+    </div>
+
+    <div th:if="${payment != null}" class="summary-card">
+        <div>결제금액: <strong th:text="${payment.amount}"></strong>원</div>
+        <div>결제상태: <span th:text="${payment.status}"></span></div>
+
+        <form th:if="${payment.status == T(com.example.trainbooking.module.payment.domain.PaymentStatus).READY}"
+              method="post" th:action="@{/web/payments/{id}/approve(id=${payment.paymentId})}">
+            <button type="submit">결제 승인</button>
+        </form>
+
+        <p th:if="${payment.status == T(com.example.trainbooking.module.payment.domain.PaymentStatus).APPROVED}"
+           class="success">결제 완료 및 티켓이 발급되었습니다.</p>
+    </div>
+
+    <form th:if="${booking.status != T(com.example.trainbooking.module.booking.domain.BookingStatus).CANCELED}"
+          method="post" th:action="@{/web/bookings/{id}/cancel(id=${booking.bookingId})}">
+        <button type="submit" class="btn-danger">예매 취소</button>
+    </form>
+
+    <a class="link-back" th:href="@{/web/trips}">← 열차 목록으로</a>
+</main>
+</body>
+</html>
