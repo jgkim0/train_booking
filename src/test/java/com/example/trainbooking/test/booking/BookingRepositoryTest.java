@@ -1,5 +1,6 @@
 package com.example.trainbooking.test.booking;
 
+import com.example.trainbooking.config.JpaAuditingConfig;
 import com.example.trainbooking.module.booking.domain.Booking;
 import com.example.trainbooking.module.booking.infrastructure.BookingRepository;
 import com.example.trainbooking.module.booking.domain.BookingStatus;
@@ -12,15 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @DataJpaTest
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(JpaAuditingConfig.class)
 public class BookingRepositoryTest {
 
     @Autowired
@@ -46,7 +50,6 @@ public class BookingRepositoryTest {
                 .userId(1L)
                 .trip(trip)
                 .status(BookingStatus.CREATED)
-                .createdDt(Timestamp.valueOf(LocalDateTime.now()))
                 .seat(seat).build();
 
         Booking saved = bookingRepository.save(booking);
