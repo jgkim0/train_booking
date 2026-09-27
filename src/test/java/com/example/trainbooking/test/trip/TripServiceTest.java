@@ -1,5 +1,7 @@
 package com.example.trainbooking.test.trip;
 
+import com.example.trainbooking.common.exception.TripNotFoundException;
+import com.example.trainbooking.module.station.domain.Station;
 import com.example.trainbooking.module.trip.domain.Trip;
 import com.example.trainbooking.module.trip.domain.TripRepository;
 import com.example.trainbooking.module.trip.application.TripServiceImpl;
@@ -9,9 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,10 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
-@SpringBootTest
-
-
 class TripServiceTest {
 
     @Mock
@@ -35,7 +32,12 @@ class TripServiceTest {
     void trip이_존재하면_정상반환() {
         //given
         Long id = 1L;
-        Trip trip = new Trip();
+        Station fromStation = new Station(10L, "서울");
+        Station toStation = new Station(20L, "부산");
+        LocalDateTime departureTime = LocalDateTime.now();
+        LocalDateTime arrivalTime = departureTime.plusHours(2);
+        Trip trip = Trip.create(101L, fromStation, toStation, departureTime, arrivalTime);
+
         given(tripRepository.findById(id))
                 .willReturn(Optional.of(trip));
 
@@ -43,8 +45,11 @@ class TripServiceTest {
         TripResponse result = tripService.getTrip(id);
 
         //then
-        assertThat(result).isEqualTo(trip);
-
+        assertThat(result.trainNo()).isEqualTo(101L);
+        assertThat(result.fromStationId()).isEqualTo(10L);
+        assertThat(result.toStationId()).isEqualTo(20L);
+        assertThat(result.departureTime()).isEqualTo(departureTime);
+        assertThat(result.arrivalTime()).isEqualTo(arrivalTime);
     }
 
     @Test
@@ -58,7 +63,7 @@ class TripServiceTest {
         //when
         //then
         assertThatThrownBy(()->tripService.getTrip(id))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(TripNotFoundException.class);
     }
 
 

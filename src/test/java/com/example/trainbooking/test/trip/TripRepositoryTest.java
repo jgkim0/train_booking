@@ -21,7 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class TripRepositoryTest {
 
@@ -41,18 +41,13 @@ public class TripRepositoryTest {
     @Test
     void trip_저장() {
 
-        LocalDateTime date = LocalDateTime.now();
+        LocalDateTime departureTime = LocalDateTime.now();
+        LocalDateTime arrivalTime = departureTime.plusHours(2);
 
-        Station toStation = stationRepository.getReferenceById(1L);
-        Station fromStation = stationRepository.getReferenceById(2L);
+        Station fromStation = stationRepository.getReferenceById(1L);
+        Station toStation = stationRepository.getReferenceById(2L);
 
-        Trip trip = Trip.builder()
-                .arrivalTime(date)
-                .departureTime(date)
-                .toStation(toStation)
-                .fromStation(fromStation)
-                .trainNo(1L)
-                .build();
+        Trip trip = Trip.create(1L, fromStation, toStation, departureTime, arrivalTime);
 
         Trip saved = tripRepository.save(trip);
         tripRepository.flush();   // 👈 핵심
@@ -62,8 +57,8 @@ public class TripRepositoryTest {
 
         assertThat(saved.getTripId()).isNotNull();
         assertThat(found.getTrainNo()).isEqualTo(1L);
-        assertThat(found.getFromStation().getStationId()).isEqualTo(2L);
-        assertThat(found.getToStation().getStationId()).isEqualTo(1L);
+        assertThat(found.getFromStation().getStationId()).isEqualTo(1L);
+        assertThat(found.getToStation().getStationId()).isEqualTo(2L);
 
     }
 
@@ -71,7 +66,7 @@ public class TripRepositoryTest {
     void trip_검색옵션_조회() {
         List<TripSelectOptions> tripSelectOptions = tripRepository.findTripSelectOptions();
 
-        assertThat(tripSelectOptions.get(1).getDepartureTime()).isNotNull();
+        assertThat(tripSelectOptions.get(1).departureTime()).isNotNull();
     }
 
     @Test
@@ -82,6 +77,6 @@ public class TripRepositoryTest {
         List<TripResponse> tripSelectOptions = tripRepository.findByStation_StationId_And_DepartureTime(5L, start, end);
 
 //        assertThat(tripSelectOptions).isNotEmpty();
-        assertThat(tripSelectOptions.get(0).getDepartureTime()).isNotNull();
+        assertThat(tripSelectOptions.get(0).departureTime()).isNotNull();
     }
 }
