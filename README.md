@@ -26,13 +26,13 @@
 
 ### Backend
 
-- Java 17
+- Java 21
 - Spring Boot
 - Spring Data JPA (Hibernate)
 
 ### Database
 
-- MySQL
+- MariaDB
 
 ### Architecture
 
@@ -167,8 +167,8 @@ Booking
 
 1. 사용자가 결제 취소 요청을 합니다.
 2. Payment 상태를 확인합니다.
-3. Payment 상태를 **CANCELD**로 변경합니다.
-4. Booking 상태를 **CANCELD** 로 변경합니다.
+3. Payment 상태를 **CANCELED**로 변경합니다.
+4. Booking 상태를 **CANCELED** 로 변경합니다.
 5. 좌석 상태를 **AVAILABLE** 로 변경합니다.
 
 ---
@@ -186,39 +186,55 @@ User B → Seat 10 예약 시도
 
 두 요청이 동시에 처리되면 **중복 예약(Double Booking)** 이 발생할 수 있습니다.
 
-### 해결 전략
+### 현재 적용된 해결 전략
 
-### 1️⃣ Optimistic Lock
+### 1️⃣ Pessimistic Lock (예매 취소 / 결제 승인)
 
-Seat Entity에 version 필드를 두어 동시 수정 충돌을 감지합니다.
+예매 취소, 결제 승인처럼 **상태 전이가 일어나는 시점**에는 비관적 락으로 동시 접근을 막습니다.
 
 ```java
-@Version
-private Long version;
+// BookingRepository.java
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+@Query("select b from Booking b where b.bookingId = :bookingId")
+Optional<Booking> findByIdWithLock(@Param("bookingId") Long bookingId);
 ```
 
-동시에 좌석 상태를 변경하면 **OptimisticLockException** 이 발생합니다.
+```java
+// PaymentRepository.java
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+@Query("select p from Payment p where p.paymentId = :paymentId")
+Optional<Payment> findByIdWithLock(@Param("paymentId") Long paymentId);
+```
 
----
+`cancelBooking()`, `approvePayment()`가 이 메서드로 대상 행을 잠근 뒤 상태를 변경하므로, 같은 예매/결제 건에 대한 동시 요청은 직렬화됩니다.
 
 ### 2️⃣ Seat Status 기반 예약 제어
 
-좌석 상태가 **AVAILABLE** 일 때만 예약이 가능합니다.
+좌석 상태가 **AVAILABLE** 일 때만 예약이 가능하도록 엔티티에서 검증합니다.
 
-```
-AVAILABLE → RESERVED
-```
-
-예시
-
-```sql
-update seat
-set status = 'RESERVED'
-where seat_id = ?
-and status = 'AVAILABLE'
+```java
+// Seat.java
+public void checkBeforeBook() {
+    if (this.status != SeatStatus.AVAILABLE) {
+        throw new DuplicationBookingException("이미 예약된 좌석입니다.");
+    }
+}
 ```
 
-조건이 맞지 않으면 예약이 실패합니다.
+### 3️⃣ 좌석 예약 생성 시점의 락 (Pessimistic Lock)
+
+**좌석 예약 생성 시점**에도 동일하게 비관적 락을 적용했습니다. `BookingServiceImpl.createBooking()`은 `SeatRepository.findByIdWithLock()`으로 대상 좌석을 잠근 뒤 상태를 확인·변경하므로, 같은 좌석에 대한 동시 예약 요청은 직렬화되어 한 건만 성공합니다.
+
+```java
+// BookingServiceImpl.java
+Seat seat = seatRepository.findByIdWithLock(bookingRequest.seatId())
+        .orElseThrow(() -> new SeatNotFoundException("조회된 좌석 정보가 없습니다."));
+
+seat.checkBeforeBook();
+seat.book();
+```
+
+`BookingConcurrencyTest`에서 같은 좌석에 10개의 스레드가 동시에 예약을 요청했을 때, 정확히 1건만 성공하고 나머지 9건은 `DuplicationBookingException`으로 실패하는 것을 검증합니다.
 
 ---
 
